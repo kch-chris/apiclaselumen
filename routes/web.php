@@ -14,3 +14,14 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
+
+
+$router->group(['prefix' => 'api/v1/'], function() use ($router) {
+    // rutas de recursos de acceso
+    $router->post('auth/login', ['as' => 'login', 'uses' => 'Auth\LoginController@authenticate']);
+
+    $router->get('admin/user',['as'=>'user.index','uses' => 'Admin\UserController@index']);
+    $router->post('admin/user',['as'=>'user.store','uses' => 'Admin\UserController@store']);
+
+}
+);
