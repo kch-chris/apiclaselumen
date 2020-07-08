@@ -68,7 +68,7 @@ class UserController extends Controller
         return view('catalogs.users.edit')->with(['user'=>$user]);
     }
 
-    public function update($id,UsersRequest $request)
+    public function update($id,Request $request)
     {
         $user = User::where('id', '=' , $id)->firstOrFail();
 

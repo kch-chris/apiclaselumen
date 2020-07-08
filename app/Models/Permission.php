@@ -14,4 +14,3 @@ class Permission extends Model
         'name', 'guard_name'
     ];
 }
-s

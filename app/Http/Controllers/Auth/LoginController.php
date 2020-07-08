@@ -101,10 +101,16 @@ class LoginController extends Controller
         }
 
         if(Hash::check($request->input('password'), $user->password)){
-            // $apikey = base64_encode(Str::random(12));
-            // User::where('email', $request->input('email'))->update(['api_key' => "$apikey"]);;
             
-            return response()->json(['status' => true,'data'=>['token' => $this->jwt($user)],'message'=>'Login successfully']);
+            $refresh_token=Str::random(100);
+            
+            $user->refresh_token=$refresh_token;
+            $user->save();
+            
+            return response()->json(['status' => true,'data'=>[
+                'token' => $this->jwt($user),
+                'refresh_token'=>$refresh_token
+            ],'message'=>'Login successfully']);
         }else{
             return response()->json(['status' => false,'message'=>'An Error is occurred'],400);
         }

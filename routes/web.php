@@ -20,8 +20,13 @@ $router->group(['prefix' => 'api/v1/'], function() use ($router) {
     // rutas de recursos de acceso
     $router->post('auth/login', ['as' => 'login', 'uses' => 'Auth\LoginController@authenticate']);
 
-    $router->get('admin/user',['as'=>'user.index','uses' => 'Admin\UserController@index']);
-    $router->post('admin/user',['as'=>'user.store','uses' => 'Admin\UserController@store']);
-
 }
 );
+
+$router->group(['prefix' => 'api/v1','middleware' => 'jwt.auth'], 
+    function() use ($router) {
+
+        $router->get('admin/user',['as'=>'user.index','middleware'=>'req.permission:see_user','uses' => 'Admin\UserController@index']);
+        $router->post('admin/user',['as'=>'user.store','middleware'=>'req.permission:create_user','uses' => 'Admin\UserController@store']);
+
+    });

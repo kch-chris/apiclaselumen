@@ -85,7 +85,10 @@ $app->configure('app');
         'jwt.auth' => App\Http\Middleware\JwtMiddleware::class,
     ]);
 
-    
+    $app->routeMiddleware([
+        'req.permission' => App\Http\Middleware\ReqPermissionMiddleware::class,
+    ]);
+
     $app->middleware([
         App\Http\Middleware\CorsMiddleware::class,
     ]);
