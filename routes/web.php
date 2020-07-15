@@ -22,6 +22,8 @@ $router->group(['prefix' => 'api/v1/'], function() use ($router) {
 
     $router->get('admin/user',['as'=>'user.index','uses' => 'Admin\UserController@index']);
     $router->post('admin/user',['as'=>'user.store','uses' => 'Admin\UserController@store']);
+    $router->put('admin/user/{id}',['as'=>'user.update','uses' => 'Admin\UserController@update']);
+    $router->delete('admin/user/{id}',['as'=>'user.destroy','uses' => 'Admin\UserController@destroy']);
 
 }
 );

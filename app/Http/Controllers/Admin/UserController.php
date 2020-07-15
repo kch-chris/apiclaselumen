@@ -61,34 +61,48 @@ class UserController extends Controller
         
     }
 
-    public function show($user)
+    public function update($id,Request $request)
     {
-        $user = User::where('id', '=' , $user)->firstOrFail();
-        
-        return view('catalogs.users.edit')->with(['user'=>$user]);
-    }
+        try {
+            $this->validate($request, [
+                'name' => 'required',
+                'email' => 'required|email',
+                'password'=>'required'
+            ]);
 
-    public function update($id,UsersRequest $request)
-    {
-        $user = User::where('id', '=' , $id)->firstOrFail();
+            $user = User::where('id', '=' , $id)->firstOrFail();
 
-        $user->name = $request->post('name');
-        $user->email = $request->post('email');
-        $user->password = Hash::make($request->post('password'));
+            $user->name = $request->post('name');
+            $user->email = $request->post('email');
+            $user->password = Hash::make($request->post('password'));
 
-        $user->save();
+            $user->save();
+    
+            return response()->json([
+                'succes'=>true,
+                'message'=>'User Updated Successfully',
+                'data'=>['id'=>$user->id]
+                ]);
 
-        $user->assignRole($request->post('role'));
-
-        return redirect()->route('users.index');
+        } catch (\Throwable $th) {
+            return response()->json(['status'=>false,'message'=>$th->getMessage(),'data'=>$th->response ],400);
+        }
 
     }
 
     public function destroy($id)
     {
-        user::destroy($id);
+        try {
+            user::destroy($id);
+            
+            return response()->json([
+                'succes'=>true,
+                'message'=>'User Deleted Successfully'
+                ]);
 
-        return redirect()->route('users.index');
+        } catch (\Throwable $th) {
+            return response()->json(['status'=>false,'message'=>$th->getMessage(),'data'=>$th->response ],400);
+        }
     }
 
 
