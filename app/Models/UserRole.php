@@ -12,4 +12,6 @@ class UserRole extends Model
     protected $fillable = [
         'model_id' , 'role_id'
     ]; 
+
+    public $timestamps=false;
 }

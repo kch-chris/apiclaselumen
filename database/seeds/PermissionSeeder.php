@@ -15,26 +15,26 @@ class PermissionSeeder extends Seeder
      */
     public function run()
     {
-        $roleAdmin= Role::create(['name'=>'Admin','description'=> 'Administrative Role']);
+        $roleAdmin= Role::create(['name'=>'Admin','guard_name'=> 'web']);
 
         $modules = ['user','role','permission','product'];
 
         foreach($modules as $module){
                 
-            $editPer = Permission::create(['name' => 'edit '.$module,'description'=>'Can Edit '.$module]);
-            RolePermission::create(['role_id'=>$roleAdmin->role_id, 'permission_id'=>$editPer->permission_id]);
+            $editPer = Permission::create(['name' => 'edit '.$module,'guard_name'=>'edit_'.$module]);
+            RolePermission::create(['role_id'=>$roleAdmin->id, 'permission_id'=>$editPer->id]);
 
-            $deletePer = Permission::create(['name' => 'delete '.$module,'description'=>'Can Delete '.$module]);
-            RolePermission::create(['role_id'=>$roleAdmin->role_id, 'permission_id'=>$deletePer->permission_id]);
+            $deletePer = Permission::create(['name' => 'delete '.$module,'guard_name'=>'delete_'.$module]);
+            RolePermission::create(['role_id'=>$roleAdmin->id, 'permission_id'=>$deletePer->id]);
 
-            $createPer = Permission::create(['name' => 'create '.$module,'description'=>'Can Create '.$module]);
-            RolePermission::create(['role_id'=>$roleAdmin->role_id, 'permission_id'=>$createPer->permission_id]);
+            $createPer = Permission::create(['name' => 'create '.$module,'guard_name'=>'create_'.$module]);
+            RolePermission::create(['role_id'=>$roleAdmin->id, 'permission_id'=>$createPer->id]);
 
-            $seePer = Permission::create(['name' => 'see '.$module,'description'=>'Can See '.$module]);
-            RolePermission::create(['role_id'=>$roleAdmin->role_id, 'permission_id'=>$seePer->permission_id]);
+            $seePer = Permission::create(['name' => 'see '.$module,'guard_name'=>'see_'.$module]);
+            RolePermission::create(['role_id'=>$roleAdmin->id, 'permission_id'=>$seePer->id]);
 
         }
 
-        UserRole::create(['user_id'=>1, 'role_id'=>$roleAdmin->role_id]);
+        UserRole::create(['model_id'=>1,'model_type'=>'App\User','role_id'=>$roleAdmin->id]);
     }
 }
