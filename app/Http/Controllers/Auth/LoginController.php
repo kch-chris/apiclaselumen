@@ -90,29 +90,156 @@ class LoginController extends Controller
      */
     public function authenticate(Request $request)
     {
-        $this->validate($request, [
+        try {
+            $this->validate($request, [
                 'email' => 'required|email',
                 'password' => 'required'
             ]);
-        $user = User::where('email', $request->input('email'))->first();
-        
-        if(!$user){
-            return response()->json(['status'=>false, 'message'=>'Email does not exist'],400);
+            $user = User::where('email', $request->input('email'))->first();
+            
+            if(!$user){
+                return response()->json(['status'=>false, 'message'=>'Email does not exist'],400);
+            }
+
+            if(Hash::check($request->input('password'), $user->password)){
+                
+                $refresh_token=Str::random(100);
+                
+                $user->refresh_token=$refresh_token;
+                $user->save();
+                
+                return response()->json(['status' => true,'data'=>[
+                    'token' => $this->jwt($user),
+                    'refresh_token'=>$refresh_token
+                    ],'message'=>'Login successfully']);
+            }else{
+                return response()->json(['status' => false,'message'=>'An Error is occurred'],400);
+            }
+        } catch (\Throwable $th) {
+            
+            return response()->json(['status' => false,'message'=>$th->getMessage()],400);
         }
 
-        if(Hash::check($request->input('password'), $user->password)){
-            
-            $refresh_token=Str::random(100);
-            
-            $user->refresh_token=$refresh_token;
-            $user->save();
-            
-            return response()->json(['status' => true,'data'=>[
-                'token' => $this->jwt($user),
-                'refresh_token'=>$refresh_token
-            ],'message'=>'Login successfully']);
-        }else{
-            return response()->json(['status' => false,'message'=>'An Error is occurred'],400);
+        
+    }
+    
+    /**
+     * @OA\Post(
+     *     path="/auth/refreshToken",
+     *     tags={"Auth"},
+     *     summary="Refresh token de usuario",
+     *     operationId="",
+     *      @OA\Response(
+     *         response=200,
+     *         description="Success Request"
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid input"
+     *     ),
+     *     @OA\RequestBody(
+     *         description="Input data format",
+     *         required=true, 
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 type="object",     
+     *                 @OA\Property(
+     *                     property="refresh_token",
+     *                     description="Token de sesion de usuario",
+     *                     type="string",
+     *                 ),
+     * *               required={"refresh_token"},
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function refreshToken(Request $request)
+    {
+        try {
+            $this->validate($request, [
+                'refresh_token' => 'required'
+            ]);
+
+            $refresh_token=$request->post('refresh_token');
+            $user = User::where('refresh_token',$refresh_token)->first();
+
+            if(!is_null($user))
+            {
+                return response()->json(['status' => true,'data'=>[
+                    'token' => $this->jwt($user),
+                    'refresh_token'=>$refresh_token
+                    ],
+                    'message'=>'Refresh token successfully']);
+            }
+            else{
+                return response()->json(['status' => false,'message'=>'Invalid Refresh token'],400);
+            }
+
+
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false,'message'=>$th->getMessage()],400);
         }
-    }   
+
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/auth/logout",
+     *     tags={"Auth"},
+     *     summary="Logout del usuario",
+     *     operationId="",
+     *      @OA\Response(
+     *         response=200,
+     *         description="Success Request"
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid input"
+     *     ),
+     *     @OA\RequestBody(
+     *         description="Input data format",
+     *         required=true, 
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 type="object",     
+     *                 @OA\Property(
+     *                     property="refresh_token",
+     *                     description="Token de sesion de usuario",
+     *                     type="string",
+     *                 ),
+     * *               required={"refresh_token"},
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function logout(Request $request)
+    {
+        try {
+            $this->validate($request, [
+                'refresh_token' => 'required'
+            ]);
+
+            $refresh_token=$request->post('refresh_token');
+            $user = User::where('refresh_token',$refresh_token)->first();
+
+            if(!is_null($user))
+            {
+                $user->refresh_token=null;
+                $user->save();
+
+                return response()->json(['status' => true,'message'=>'Logout successfully']);
+            }
+            else{
+                return response()->json(['status' => false,'message'=>'Invalid Refresh token'],400);
+            }
+
+
+        } catch (\Throwable $th) {
+            return response()->json(['status' => false,'message'=>$th->getMessage()],400);
+        }
+    }
 }

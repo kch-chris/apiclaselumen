@@ -11,6 +11,35 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+
+    /**
+     * @OA\Get(
+     *     path="/admin/user",
+     *     tags={"User"},
+     *     summary="Listado de Usuarios",
+     *     operationId="listuser",
+     *      @OA\Response(
+     *         response=200,
+     *         description="Success Request"
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid input"
+     *     ),
+     *     @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Unauthorized request"
+     *      ),
+     *     security={
+     *         {"authorization": {}}
+     *     }
+     *     
+     * )
+     */
     public function index(){
 
         $users = User::where('id','>', 0)->get();
@@ -24,12 +53,67 @@ class UserController extends Controller
                 ]);
         }
         else {
-            return response()->json(['succes'=>false,'message'=>'Data Not Found',]);
+            return response()->json(['succes'=>false,'message'=>'Data Not Found'],400);
         }
         
 
     }
 
+
+    /**
+     * @OA\Post(
+     *     path="/admin/user",
+     *     tags={"User"},
+     *     summary="Crear Usuario",
+     *     operationId="createuser",
+     *      @OA\Response(
+     *         response=200,
+     *         description="Success Request"
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid input"
+     *     ),
+     *     @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Unauthorized request"
+     *      ),
+     *     @OA\RequestBody(
+     *         description="Input data format",
+     *         required=true, 
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 type="object",     
+     *                 @OA\Property(
+     *                     property="name",
+     *                     description="Nombre del Usuario",
+     *                     type="string",
+     *                 ),
+     *                 @OA\Property(
+     *                     property="email",
+     *                     description="Email del Usuario",
+     *                     type="string",
+     *                 ),
+     *                 @OA\Property(
+     *                     property="password",
+     *                     description="Contraseña del Usuario",
+     *                     type="string",
+     *                 ),
+     * *               required={"name","email","password"},
+     *             )
+     *         )
+     *     ),
+     *     security={
+     *         {"authorization": {}}
+     *     }
+     *     
+     * )
+     */
     public function store(Request $request)
     {
         // dd($request->post("name"));
@@ -61,20 +145,85 @@ class UserController extends Controller
         
     }
 
+
+    /**
+     * @OA\Put(
+     *     path="/admin/user/{id}",
+     *     tags={"User"},
+     *     summary="Actualiza Usuario",
+     *     operationId="updateuser",
+     *      @OA\Response(
+     *         response=200,
+     *         description="Success Request"
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid input"
+     *     ),
+     *     @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Unauthorized request"
+     *      ),
+     *     @OA\Parameter(
+     *          name="id",
+     *          description="Id de Usuario",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *     @OA\RequestBody(
+     *         description="Input data format",
+     *         required=true, 
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 type="object",     
+     *                 @OA\Property(
+     *                     property="name",
+     *                     description="Nombre del Usuario",
+     *                     type="string",
+     *                 ),
+     *                 @OA\Property(
+     *                     property="email",
+     *                     description="Email del Usuario",
+     *                     type="string",
+     *                 ),
+     *                 @OA\Property(
+     *                     property="password",
+     *                     description="Contraseña del Usuario",
+     *                     type="string",
+     *                 ),
+     * *               required={"name","email"},
+     *             )
+     *         )
+     *     ),
+     *     security={
+     *         {"authorization": {}}
+     *     }
+     *     
+     * )
+     */
     public function update($id,Request $request)
     {
         try {
             $this->validate($request, [
                 'name' => 'required',
-                'email' => 'required|email',
-                'password'=>'required'
+                'email' => 'required|email|unique:users,email,'.$id.',id'
             ]);
 
             $user = User::where('id', '=' , $id)->firstOrFail();
 
             $user->name = $request->post('name');
             $user->email = $request->post('email');
-            $user->password = Hash::make($request->post('password'));
+
+            if(!is_null($request->post('password')))
+                $user->password = Hash::make($request->post('password'));
 
             $user->save();
     
@@ -85,15 +234,53 @@ class UserController extends Controller
                 ]);
 
         } catch (\Throwable $th) {
-            return response()->json(['status'=>false,'message'=>$th->getMessage(),'data'=>$th->response ],400);
+            return response()->json(['status'=>false,'message'=>$th->getMessage() ],400);
         }
 
     }
+    
 
+    /**
+     * @OA\Delete(
+     *     path="/admin/user/{id}",
+     *     tags={"User"},
+     *     summary="Elimina Usuario",
+     *     operationId="deleteuser",
+     *      @OA\Response(
+     *         response=200,
+     *         description="Success Request"
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Invalid input"
+     *     ),
+     *     @OA\Response(
+     *          response=401,
+     *          description="Unauthenticated",
+     *      ),
+     *      @OA\Response(
+     *          response=403,
+     *          description="Unauthorized request"
+     *      ),
+     *     @OA\Parameter(
+     *          name="id",
+     *          description="Id de Usuario",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *     security={
+     *         {"authorization": {}}
+     *     }
+     *     
+     * )
+     */
     public function destroy($id)
     {
         try {
-            user::destroy($id);
+            User::destroy($id);
             
             return response()->json([
                 'succes'=>true,
@@ -105,33 +292,4 @@ class UserController extends Controller
         }
     }
 
-
-    public function editPermissions($userId){
-
-        $permissions = Permission::all();
-
-        $user = User::findorFail($userId);
-
-        $usPermission= $user->getAllPermissions();
-        //dd($usPermission);
-        return view('catalogs.users.permissions')->with([
-            'permissions'=>$permissions,
-            'user'=>$user,
-            'usPermission'=>$usPermission
-            ]);
-    }
-
-    public function savePermissions($userId, Request $request){
-        $user = User::findorFail($userId);
-
-        $permissions=[];
-        if($request->has('permissions'))
-        { 
-            $permissions=array_keys($request->post('permissions'));
-        }
-
-        $user->syncPermissions($permissions);
-
-        return redirect()->route('users.index');
-    }
 }
