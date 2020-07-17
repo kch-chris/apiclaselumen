@@ -13,15 +13,27 @@ class RolePermissionsController extends Controller
     public function store(Request $request)
     {
         // dd($request->post('description'));
+        try {
+            $this->validate($request, [
+                'permission_id' => 'required',
+                'role_id'=>'required'
+            ]);
 
-        $newrolepermission = new RolePermissions();
+            $newrolepermission = new RolePermissions();
 
-        $newrolepermission->permission_id = $request->post('permission_id');
-        $newrolepermission->role_id = $request->post('role_id');
+            $newrolepermission->permission_id = $request->post('permission_id');
+            $newrolepermission->role_id = $request->post('role_id');
 
-        $newrolepermission->save();
+            $newrolepermission->save();
+    
+            return response()->json([
+                'succes'=>true,
+                'message'=>'Successfully assigned permissions'
+                ]);
 
-        return redirect()->route('rolepermissions.index');
+        } catch (\Throwable $th) {
+            return response()->json(['status'=>false,'message'=>$th->getMessage()],400);
+        }
     }
 
     public function edit($id)
