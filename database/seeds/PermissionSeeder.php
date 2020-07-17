@@ -3,7 +3,7 @@
 use Illuminate\Database\Seeder;
 use App\Models\Permission;
 use App\Models\Role;
-use App\Models\RolePermission;
+use App\Models\RolePermissions;
 use App\Models\UserRole;
 
 class PermissionSeeder extends Seeder
@@ -22,16 +22,16 @@ class PermissionSeeder extends Seeder
         foreach($modules as $module){
                 
             $editPer = Permission::create(['name' => 'edit '.$module,'guard_name'=>'edit_'.$module]);
-            RolePermission::create(['role_id'=>$roleAdmin->id, 'permission_id'=>$editPer->id]);
+            RolePermissions::create(['role_id'=>$roleAdmin->id, 'permission_id'=>$editPer->id]);
 
             $deletePer = Permission::create(['name' => 'delete '.$module,'guard_name'=>'delete_'.$module]);
-            RolePermission::create(['role_id'=>$roleAdmin->id, 'permission_id'=>$deletePer->id]);
+            RolePermissions::create(['role_id'=>$roleAdmin->id, 'permission_id'=>$deletePer->id]);
 
             $createPer = Permission::create(['name' => 'create '.$module,'guard_name'=>'create_'.$module]);
-            RolePermission::create(['role_id'=>$roleAdmin->id, 'permission_id'=>$createPer->id]);
+            RolePermissions::create(['role_id'=>$roleAdmin->id, 'permission_id'=>$createPer->id]);
 
             $seePer = Permission::create(['name' => 'see '.$module,'guard_name'=>'see_'.$module]);
-            RolePermission::create(['role_id'=>$roleAdmin->id, 'permission_id'=>$seePer->id]);
+            RolePermissions::create(['role_id'=>$roleAdmin->id, 'permission_id'=>$seePer->id]);
 
         }
 

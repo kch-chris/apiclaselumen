@@ -32,6 +32,9 @@ $router->group(['prefix' => 'api/v1','middleware' => 'jwt.auth'],
         $router->delete('admin/user/{id}',['as'=>'user.destroy','middleware'=>'req.permission:delete_user','uses' => 'Admin\UserController@destroy']);
         
         $router->post('admin/rolepermissions',['as'=>'rolepermissions.store','uses' => 'Admin\RolePermissionsController@store']);
+
+        $router->put('admin/role/assignPermission/{id}',['as'=>'user.assignpermission','middleware'=>'req.permission:edit_role','uses' => 'Admin\RoleController@assignPermission']);
+        $router->get('admin/role/getPermission/{id}',['as'=>'user.getpermission','middleware'=>'req.permission:see_role','uses' => 'Admin\RoleController@getPermission']);
         
     }
 );
